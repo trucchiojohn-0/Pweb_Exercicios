@@ -1,41 +1,63 @@
 const { closeConnection } = require('./db');
-const { getAll, getById, insert, update, remove } = require('./alunoModel');
+const prompt= require('prompt-sync')();
+const { getAll, getById, insert, update, remove } = require('./cursoModel');
 
-const main = async () => {
-  const alunos = await getAll();
+const cursoMain = async () => {
+    let continuar = true;
 
-  console.log('TODOS OS ALUNOS');
-  console.log(alunos);
+    while (continuar) {
+        console.log('\n--- SISTEMA DE CURSOS ---');
+        console.log('1. Listar');
+        console.log('2. Inserir');
+        console.log('3. Buscar');
+        console.log('4. Atualizar');
+        console.log('5. Remover');
+        console.log('0. Sair');
 
-  let aluno = {
-    nome: 'João da Silva',
-    email: 'joao.silva@example.com',
-    matricula: '1234567890',
-    data_nascimento: '1990-01-01'
-  };
+        const opcao = prompt('Operação: ');
 
-  aluno = await insert(aluno);
+        switch (opcao) {
+            case '1':
+                const lista = await getAll();
+                console.table(lista);
+                break;
 
-  console.log('ALUNO INSERIDO');
-  console.log(aluno);
+            case '2':
+                const nome = prompt('Nome: ');
+                const descricao = prompt('Descrição: ');
+                await insert({ nome, descricao });
+                console.log('Inserido.');
+                break;
 
-  aluno = await getById(aluno.id);
+            case '3':
+                const idB = prompt('ID: ');
+                const encontrado = await getById(idB);
+                console.log(encontrado);
+                break;
 
-  console.log('ALUNO BUSCADO');
-  console.log(aluno);
+            case '4':
+                const idA = prompt('ID para alterar: ');
+                const novoNome = prompt('Novo nome: ');
+                const novaDesc = prompt('Nova descrição: ');
+                await update({ id: idA, nome: novoNome, descricao: novaDesc });
+                console.log('Atualizado.');
+                break;
 
-  aluno.nome = 'DENECLEY'
-  aluno = await update(aluno);
+            case '5':
+                const idR = prompt('ID para remover: ');
+                await remove(idR);
+                console.log('Removido.');
+                break;
 
-  console.log('ALUNO ATUALIZADO');
-  console.log(aluno);
+            case '0':
+                await closeConnection();
+                continuar = false;
+                break;
 
-  aluno = await remove(aluno.id);
+            default:
+                console.log('Inválido.');
+        }
+    }
+};
 
-  console.log('ALUNO REMOVIDO');
-  console.log(aluno);
-
-  await closeConnection();
-}
-
-main();
+cursoMain();
